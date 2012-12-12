@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            id="modelfacets.text.textresource2xmi.contribution1">
+         <menu
+               label="Model Facets"
+               path="additions"
+               id="modelfacets.text.textresource2xmi.rootMenu">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         
+         <action
+               label="Text resource to XMI"
+               class="modelfacets.text.textresource2xmi.popup.actions.TextResource2XMI"
+               menubarPath="modelfacets.text.textresource2xmi.rootMenu/group1"
+               enablesFor="1"
+               id="modelfacets.text.textresource2xmi.newAction">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
