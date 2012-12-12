@@ -1,0 +1,10 @@
+# Ignored files
+# Manually modified
+
+.metadata
+
+# Binaries
+*/bin/*
+
+
+

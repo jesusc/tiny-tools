@@ -1,4 +1,4 @@
-modelfacets
-===========
+Model Facets
+============
 
-Small utilities for Eclipse-based modeling
+Small utilities for Eclipse-based modeling.
