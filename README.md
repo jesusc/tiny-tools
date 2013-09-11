@@ -7,9 +7,9 @@ annoying tasks.
 
 So far:
  * Convert textual resource (e.g., Xtext, EMFText) into XMI file.
+ * Register meta-model. 
 
 Planned:
- * Register meta-model. It seems that there is no default UI for this in EMF.
  * List of registered meta-models.
  * Convert ATL transformation files to XMI and back. Useful to experiment with Higher Order Transformations.
 
