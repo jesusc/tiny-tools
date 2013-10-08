@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ModelFacets TextResource to XMI
-Bundle-SymbolicName: modelfacets.text.textresource2xmi;singleton:=true
+Bundle-Name: Tiny Tools TextResource to XMI
+Bundle-SymbolicName: tinytools.text.textresource2xmi;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: modelfacets.text.textresource2xmi.Activator
-Bundle-Vendor: ModelFacets
+Bundle-Activator: tinytools.text.textresource2xmi.Activator
+Bundle-Vendor: Tiny Tools
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

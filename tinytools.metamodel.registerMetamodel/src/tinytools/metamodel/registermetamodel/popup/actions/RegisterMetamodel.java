@@ -1,4 +1,4 @@
-package modelfacets.metamodel.registermetamodel.popup.actions;
+package tinytools.metamodel.registermetamodel.popup.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
@@ -17,32 +26,33 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IObjectActionDelegate;
-import org.eclipse.ui.IWorkbenchPart;
 
-/**
- * @author Javier Canovas (me@jlcanovas.es)
- *
- */
-public class RegisterMetamodel implements IObjectActionDelegate{
+public class RegisterMetamodel implements IObjectActionDelegate {
 
-	protected ISelection selection;
-
+	private Shell shell;
+	private ISelection selection;
+	
+	/**
+	 * Constructor for Action1.
+	 */
 	public RegisterMetamodel() {
 		super();
 	}
 
+	/**
+	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
+	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-
+		shell = targetPart.getSite().getShell();
 	}
 
+	/**
+	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
+	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		this.selection = selection;
 	}
-
+	
 	public void run(IAction action){
 		Iterator it = ((IStructuredSelection) selection).iterator();
 		while (it.hasNext()) {
@@ -59,9 +69,9 @@ public class RegisterMetamodel implements IObjectActionDelegate{
 
 	private List<EPackage> register(URI uri, EPackage.Registry registry) throws Exception {
 
-		List<EPackage> ePackages = new ArrayList();
+		List<EPackage> ePackages = new ArrayList<EPackage>();
 
-		Map etfm = Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap();
+		Map<String, Object> etfm = Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap();
 		if (!etfm.containsKey("*")) {
 			etfm.put("*", new XMIResourceFactoryImpl());
 		}
@@ -73,7 +83,7 @@ public class RegisterMetamodel implements IObjectActionDelegate{
 
 		setDataTypesInstanceClasses(metamodel);
 
-		Iterator it = metamodel.getAllContents();
+		TreeIterator<EObject> it = metamodel.getAllContents();
 		while (it.hasNext()) {
 			Object next = it.next();
 			if (next instanceof EPackage) {
@@ -107,7 +117,7 @@ public class RegisterMetamodel implements IObjectActionDelegate{
 	}
 
 	private void setDataTypesInstanceClasses(Resource metamodel) {
-		Iterator it = metamodel.getAllContents();
+		TreeIterator<EObject> it = metamodel.getAllContents();
 		while (it.hasNext()) {
 			EObject eObject = (EObject) it.next();
 			if (eObject instanceof EEnum) {
@@ -129,5 +139,6 @@ public class RegisterMetamodel implements IObjectActionDelegate{
 				eDataType.setInstanceClassName(instanceClass);
 			}
 		}
-	}
+	}	
+
 }

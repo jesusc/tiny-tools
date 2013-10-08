@@ -1,8 +1,8 @@
-package modelfacets.text.textresource2xmi.popup.actions;
+package tinytools.text.textresource2xmi.popup.actions;
 
 import java.io.IOException;
 
-import modelfacets.text.textresource2xmi.Activator;
+import tinytools.text.textresource2xmi.Activator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Status;

@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ModelFacets RegisterMetamodel
-Bundle-SymbolicName: modelfacets.metamodel.registerMetamodel;singleton:=true
+Bundle-Name: Tiny Tools RegisterMetamodel
+Bundle-SymbolicName: tinytools.metamodel.registerMetamodel;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: modelfacets.metamodel.registermetamodel.Activator
+Bundle-Activator: tinytools.metamodel.registermetamodel.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.emf.common,
  org.eclipse.emf.ecore,
@@ -12,4 +12,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: ModelFacets
+Bundle-Vendor: Tiny Tools
