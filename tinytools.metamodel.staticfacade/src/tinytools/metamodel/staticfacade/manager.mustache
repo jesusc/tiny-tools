@@ -1,0 +1,79 @@
+
+package {{manager.packageName}};
+
+import java.util.HashMap;
+
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EClass;
+
+
+public class {{manager.className}} {
+	private Resource resource;
+	private HashMap<EObject, {{manager.baseClassName}}> wrappers = new HashMap<EObject, {{manager.baseClassName}}>();
+	private HashMap<Class<?>, EClass> classes = new HashMap<Class<?>, EClass>();
+		
+	public {{manager.className}}(Resource r) {
+		this.resource = r;
+	
+		TreeIterator<EObject> contents = resource.getAllContents();
+		while ( contents.hasNext() ) {
+			EObject o = contents.next();
+			
+			{{manager.baseClassName}} wrapper = createWrapperObject(o);
+			
+			classes.put(wrapper.getClass(), o.eClass());
+			classes.put(wrapper.getImplementedInterface(), o.eClass());
+			
+			wrappers.put(o, wrapper);
+		}
+	}
+
+
+	public <T> java.util.List<? extends T> allObjectsOf(Class<T> clazz) {
+		java.util.List<T> list = new java.util.ArrayList<T>();
+		
+		EClass eclass = classes.get(clazz);
+		
+		TreeIterator<EObject> contents = resource.getAllContents();
+		while ( contents.hasNext() ) {
+			EObject o = contents.next();
+		
+			if ( eclass.isInstance(o) ) {
+				T x = clazz.cast(findWrapper(o));
+				list.add( x );
+			}	
+		
+		}
+			
+		return list;
+	}
+
+	public {{manager.baseClassName}} createWrapperObject(EObject o) {
+	{{#manager.getEClasses}}
+		if ( o.eClass().getName().equals("{{name}}") && o.eClass().getEPackage().getName().equals("{{metamodelPackageName}}") )
+			return new {{qualifiedPackageName}}.{{implementationName}}(this, o);
+	{{/manager.getEClasses}}	
+	
+		throw new IllegalArgumentException("Object not found in resource: " + o);
+	}
+
+	public Object wrap(Object o) {
+		if ( o instanceof java.util.List<?>) {
+			java.util.ArrayList<{{manager.baseClassName}}> result = new java.util.ArrayList<{{manager.baseClassName}}>(); 
+			for(Object content : (java.util.List<?>) o) {
+				result.add( findWrapper(content) );
+			} 
+			return result;
+		}
+		return findWrapper(o);
+	}
+	
+	protected {{manager.baseClassName}} findWrapper(Object o) {
+		{{manager.baseClassName}} w = wrappers.get(o);
+		if ( w == null ) throw new IllegalArgumentException("No wrapper for object " + o);
+		return w;
+	}
+	
+}

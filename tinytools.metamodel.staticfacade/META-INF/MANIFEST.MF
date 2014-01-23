@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Staticfacade
+Bundle-SymbolicName: tinytools.metamodel.staticfacade
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: tinytools.metamodel.staticfacade.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.emf;bundle-version="2.6.0",
+ org.eclipse.emf.ecore;bundle-version="2.7.0",
+ org.junit,
+ org.eclipse.emf.ecore.xmi;bundle-version="2.7.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: lib/mustache-compiler-0.8.15-SNAPSHOT-jar-with-dependencies.jar

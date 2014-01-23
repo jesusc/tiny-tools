@@ -1,0 +1,27 @@
+
+package {{manager.packageName}};
+
+import org.eclipse.emf.ecore.EObject;
+
+public abstract class {{manager.baseClassName}} implements {{manager.baseClassName}}Interface {
+		
+	protected EObject object;
+	protected {{manager.qualifiedManagerClass}} manager;
+	
+	public  {{manager.baseClassName}}({{manager.qualifiedManagerClass}} manager, EObject o) {
+		this.manager = manager;
+		this.object  = o;
+	}
+		
+	public EObject original_() { return object; }
+		
+	public {{manager.baseClassName}} container_() {
+		if ( object.eContainer() == null ) return null;
+		return this.manager.findWrapper(object.eContainer());
+	}
+	
+	public interface Interface {
+		public EObject original_();
+		public {{manager.baseClassName}} container_();
+	}
+}
