@@ -23,5 +23,22 @@
          </action>
       </objectContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="tinytools.metamodel.registerMetamodel.ecoreFilesWindow"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+R">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="tinytools.metamodel.registermetamodel.OpenEcoreFilesWindow"
+            id="tinytools.metamodel.registerMetamodel.ecoreFilesWindow"
+            name="Ecore Files">
+      </command>
+   </extension>
 
 </plugin>

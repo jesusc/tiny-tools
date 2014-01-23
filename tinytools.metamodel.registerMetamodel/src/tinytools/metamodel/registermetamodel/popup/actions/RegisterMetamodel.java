@@ -67,7 +67,7 @@ public class RegisterMetamodel implements IObjectActionDelegate {
 		}
 	}
 
-	private List<EPackage> register(URI uri, EPackage.Registry registry) throws Exception {
+	public List<EPackage> register(URI uri, EPackage.Registry registry) throws Exception {
 
 		List<EPackage> ePackages = new ArrayList<EPackage>();
 

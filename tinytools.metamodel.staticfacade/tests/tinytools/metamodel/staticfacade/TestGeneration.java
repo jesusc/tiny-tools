@@ -23,7 +23,8 @@ public class TestGeneration {
 		Resource r = rs.getResource(URI.createURI("tests/tinytools/metamodel/staticfacade/ATL.ecore"), true);
 	
 		Options options = new Options();
-		options.setBaseDir("tmp_");
+		// options.setBaseDir("tmp_");
+		options.setBaseDir("/home/jesus/projects/genericity/componetization/bento.componetization.atl/atl_wrapper");
 		options.setPackagePrefix("atl.metamodel");
 		options.setManagerClass("ATLModel");
 		
