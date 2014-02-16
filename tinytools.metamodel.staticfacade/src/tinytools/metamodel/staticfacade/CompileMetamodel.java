@@ -57,16 +57,27 @@ public class CompileMetamodel {
 		String baseClassInterfaceFile = options.getBaseDir() + File.separator
 				+ managerWrapper.getQualifiedBaseClassName().replaceAll("\\.", "/") + "Interface.java";
 		
+		String visitableInterfaceFile = options.getBaseDir() + File.separator
+				+ managerWrapper.getQualifiedVisitableInterfaceName().replaceAll("\\.", "/") + ".java";
+
+		String visitorClassFile = options.getBaseDir() + File.separator
+				+ managerWrapper.getQualifiedVisitorBaseClassName().replaceAll("\\.", "/") + ".java";
+
+		
 		HashMap<String, Object> scopes = new HashMap<String, Object>();
 		scopes.put("manager", managerWrapper);
 		invokeTemplate("manager.mustache", scopes, createClassFile(managerFile));
 
 		invokeTemplate("baseclass.mustache", scopes, createClassFile(baseClassFile));
 		invokeTemplate("baseclass_interface.mustache", scopes, createClassFile(baseClassInterfaceFile));
+		invokeTemplate("visitable.mustache", scopes, createClassFile(visitableInterfaceFile));
+		invokeTemplate("visitor.mustache", scopes, createClassFile(visitorClassFile));
 
 		// Generate the classes
 		for (EClassWrapper wrapper : managerWrapper.getEClasses()) {
 			HashMap<String, Object> classScopes = new HashMap<String, Object>();
+			classScopes.put("manager", managerWrapper);
+			classScopes.put("options", options);
 			classScopes.put("class", wrapper);
 
 			String filename = getClassWrapperFilename(options, wrapper);
@@ -218,7 +229,23 @@ public class CompileMetamodel {
 		public String getQualifiedManagerClass() {
 			return this.options.getPackagePrefix() + "." + options.getManagerClass();
 		}
-		
+
+		public String getVisitableInterfaceName() {
+			return options.getManagerClass() + "Visitable";
+		}
+
+		public String getQualifiedVisitableInterfaceName() {
+			return this.options.getPackagePrefix() + "." + this.getVisitableInterfaceName();
+		}
+
+		public String getVisitorBaseClassName() {
+			return options.getManagerClass() + "Visitor";
+		}
+
+		public String getQualifiedVisitorBaseClassName() {
+			return this.options.getPackagePrefix() + "." + this.getVisitorBaseClassName();
+		}
+
 	}
 
 	public static class EClassWrapper {
@@ -256,7 +283,15 @@ public class CompileMetamodel {
 				text = text + ", " + manager.find(eClass).getQualifiedPackageName() + "." + manager.find(eClass).getName();
 			}
 			
+			if ( options.isVisitable() ) {
+				text += ", " + manager.getQualifiedVisitableInterfaceName();
+			}
+
 			return text;
+		}
+		
+		public String getClassImplementsText() {
+			return this.getName();
 		}
 		
 		public String getMetamodelPackageName() {
@@ -279,6 +314,19 @@ public class CompileMetamodel {
 			return features;
 		}
 
+		public String getContainmentRefsNames() {
+			String result = "";
+			int i = 0;
+			for(EReference r : eClass.getEAllReferences()) {
+				if ( ! r.isContainment() ) 
+					continue;
+				
+				result += ((i > 0) ? " , " : "") + '"' + r.getName() + '"';
+				i++;
+			}
+			return result + "";
+		}
+		
 		public ManagerWrapper getManager() {
 			return manager;
 		}
@@ -302,6 +350,15 @@ public class CompileMetamodel {
 					+ feature.getName().substring(1);
 		}
 
+		public String getSetterName() {
+			String prefix = "set";
+			if ( feature.isMany() ) 
+				prefix = "add";
+			
+			return prefix + Character.toUpperCase(feature.getName().charAt(0))
+					+ feature.getName().substring(1);
+		}
+
 		protected String adjustType(String type) {
 			if (feature.isMany()) {
 				type = "List<" + type + ">";
@@ -310,7 +367,8 @@ public class CompileMetamodel {
 		}
 
 		public abstract String getFeatureType();
-
+		public abstract String getFeatureParameterType();
+		
 		public boolean isReference() {
 			return false;
 		}
@@ -323,11 +381,16 @@ public class CompileMetamodel {
 		}
 
 		@Override
-		public String getFeatureType() {
+		public String getFeatureParameterType() {
 			EClassWrapper refType = clazz.getManager().find(feature.getEReferenceType());
 			String type = refType.getQualifiedPackageName() + "."
 					+ refType.getName();
-			return adjustType(type);
+			return type;
+		}
+
+		@Override
+		public String getFeatureType() {
+			return adjustType(getFeatureParameterType());
 		}
 
 		@Override
@@ -344,13 +407,18 @@ public class CompileMetamodel {
 		}
 
 		@Override
-		public String getFeatureType() {
+		public String getFeatureParameterType() {
 			String type = feature.getEAttributeType().getInstanceTypeName();
 			if ( type.equals("boolean") ) type = "Boolean";
 			if ( type.equals("int") ) type = "Integer";
 			if ( type.equals("double") ) type = "Double";
 			
-			return adjustType(type);
+			return type;
+		}
+
+		@Override
+		public String getFeatureType() {
+			return adjustType(getFeatureParameterType());
 		}
 	}
 

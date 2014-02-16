@@ -4,6 +4,7 @@ public class Options {
 	private String baseDir;
 	private String packagePrefix;
 	private String managerClass = "Manager";
+	private boolean visitable;
 
 	public String getBaseDir() {
 		return baseDir;
@@ -28,4 +29,14 @@ public class Options {
 	public String getManagerClass() {
 		return managerClass;
 	}
+	
+	public void setVisitable(boolean visitable) {
+		this.visitable = true;
+	}
+	
+	public boolean isVisitable() {
+		return visitable;
+	}
+	
+	
 }

@@ -2,6 +2,8 @@
 package {{manager.packageName}};
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 public abstract class {{manager.baseClassName}} implements {{manager.baseClassName}}Interface {
 		
@@ -20,8 +22,11 @@ public abstract class {{manager.baseClassName}} implements {{manager.baseClassNa
 		return this.manager.findWrapper(object.eContainer());
 	}
 	
-	public interface Interface {
-		public EObject original_();
-		public {{manager.baseClassName}} container_();
+	public void replaceBy({{manager.baseClassName}}Interface element) {
+		EStructuralFeature f = object.eContainingFeature();
+		EObject container    = object.eContainer();
+		
+		EcoreUtil.replace(container, f, object, element.original_());
 	}
+	
 }

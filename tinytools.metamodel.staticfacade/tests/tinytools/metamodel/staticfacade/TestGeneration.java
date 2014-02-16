@@ -24,9 +24,10 @@ public class TestGeneration {
 	
 		Options options = new Options();
 		// options.setBaseDir("tmp_");
-		options.setBaseDir("/home/jesus/projects/genericity/componetization/bento.componetization.atl/atl_wrapper");
+		options.setBaseDir("/home/jesus/projects/genericity/compiler/genericity.compiler.atl.typing/atl_wrapper");
 		options.setPackagePrefix("atl.metamodel");
 		options.setManagerClass("ATLModel");
+		options.setVisitable(true);
 		
 		CompileMetamodel compiler = new CompileMetamodel();
 		compiler.compile(r, options);

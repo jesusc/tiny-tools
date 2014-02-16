@@ -1,0 +1,44 @@
+
+package {{manager.packageName}};
+
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
+
+public abstract class {{manager.visitorBaseClassName}} {
+	protected boolean _debug = false;
+	// protected boolean _passAll = 
+	protected {{manager.baseClassName}} current;
+
+	{{#manager.getEClasses}}
+	public VisitedReferences pre{{name}}({{qualifiedPackageName}}.{{name}} self) { return new VisitedReferences({{{containmentRefsNames}}}); } 
+	public void in{{name}}({{qualifiedPackageName}}.{{name}} self) { if ( _debug ) System.out.println("Visiting {{name}}"); }
+	public void before{{name}}({{qualifiedPackageName}}.{{name}} self) { }
+	{{/manager.getEClasses}}	
+
+	protected VisitedReferences refs(String... names) {
+		return new VisitedReferences(names);
+	}
+
+	public void startVisiting({{manager.getQualifiedVisitableInterfaceName}} init) {
+		init.visit(this);
+	}	
+	
+	public {{manager.baseClassName}} getCurrent() { return current; }
+	public void setCurrent({{manager.baseClassName}} o) { current = o; }
+
+	public static class VisitedReferences {
+		private String[] names;
+		public VisitedReferences(String... names) {
+			this.names = names;
+		}
+		
+		public EReference[] getReferences({{manager.baseClassName}} obj) {
+			EReference[] result = new EReference[names.length];
+			EClass  eclass      = obj.original_().eClass();
+			for(int i = 0; i < names.length; i++) {
+				result[i] = (EReference) eclass.getEStructuralFeature(names[i]);
+			}
+			return result;
+		}
+	}
+}

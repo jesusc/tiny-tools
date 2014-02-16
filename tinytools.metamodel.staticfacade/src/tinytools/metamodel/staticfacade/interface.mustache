@@ -10,6 +10,8 @@ public interface {{class.name}} {{class.interfaceInheritanceText}} {
 	
 	{{#class.features}}
 	public {{{featureType}}} {{getterName}}();
+
+	public void {{setterName}}({{{featureParameterType}}} v);
 	{{/class.features}}
 
 }
