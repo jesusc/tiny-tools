@@ -48,7 +48,7 @@ public class {{class.implementationName}} extends {{class.baseClass}} implements
 	{{#options.visitable}}
 	@Override
 	public void visit({{manager.qualifiedVisitorBaseClassName}} visitor) {
-		{{manager.QualifiedVisitorBaseClassName}}.VisitedReferences v = visitor.pre{{class.name}}(this);
+		{{manager.QualifiedVisitorBaseClassName}}.VisitingActions v = visitor.pre{{class.name}}(this);
 		if ( v == null ) {
 			return;
 		}
@@ -57,20 +57,36 @@ public class {{class.implementationName}} extends {{class.baseClass}} implements
 		visitor.setCurrent(this);
 		visitor.before{{class.name}}(this);
 			
-		for(EReference r : v.getReferences(this)) {
-			Object refObj   = object.eGet(r);
-			if ( refObj == null ) continue;
-			Object res = manager.wrap(refObj);
-			if ( res instanceof java.util.Collection ) {
-				for(Object o : (java.util.Collection<?>) res) {
-					(({{manager.getQualifiedVisitableInterfaceName}}) o).visit(visitor);
+		for({{manager.QualifiedVisitorBaseClassName}}.VisitingAction va : v.getActions(this)) {
+			if ( va.isMethodCall() ) {
+				va.performMethodCall();		
+			} else if ( va.isFilter() ) {
+				Object res = va.performMethodCall();
+				if ( res instanceof java.util.Collection ) {
+					for(Object o : (java.util.Collection<?>) res) {
+						((atl.metamodel.ATLModelVisitable) o).visit(visitor);
+					}
+				} else {
+					((atl.metamodel.ATLModelVisitable) res).visit(visitor);
 				}
-			} else {
-				(({{manager.getQualifiedVisitableInterfaceName}}) res).visit(visitor);
+			} else if ( va.isReference() ) {
+				EReference r = va.getEReference();
+				
+				Object refObj   = object.eGet(r);
+				if ( refObj == null ) continue;
+				Object res = manager.wrap(refObj);
+				if ( res instanceof java.util.Collection ) {
+					for(Object o : (java.util.Collection<?>) res) {
+						(({{manager.getQualifiedVisitableInterfaceName}}) o).visit(visitor);
+					}
+				} else {
+					(({{manager.getQualifiedVisitableInterfaceName}}) res).visit(visitor);
+				}
 			}
 		}
 					
 		visitor.in{{class.name}}(this);
+		visitor.after{{class.name}}(this);
 		visitor.setCurrent(pop);
 	}	
 	{{/options.visitable}}

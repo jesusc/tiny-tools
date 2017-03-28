@@ -10,35 +10,146 @@ public abstract class {{manager.visitorBaseClassName}} {
 	protected {{manager.baseClassName}} current;
 
 	{{#manager.getEClasses}}
-	public VisitedReferences pre{{name}}({{qualifiedPackageName}}.{{name}} self) { return new VisitedReferences({{{containmentRefsNames}}}); } 
+	public VisitingActions pre{{name}}({{qualifiedPackageName}}.{{name}} self) { return new VisitingActions({{{containmentRefsNames}}}); } 
 	public void in{{name}}({{qualifiedPackageName}}.{{name}} self) { if ( _debug ) System.out.println("Visiting {{name}}"); }
 	public void before{{name}}({{qualifiedPackageName}}.{{name}} self) { }
+	public void after{{name}}({{qualifiedPackageName}}.{{name}} self) { }
 	{{/manager.getEClasses}}	
 
-	protected VisitedReferences refs(String... names) {
-		return new VisitedReferences(names);
+	protected VisitingActions actions(Object... things) {
+		return new VisitingActions(things);
 	}
 
-	public void startVisiting({{manager.getQualifiedVisitableInterfaceName}} init) {
+	public void startVisiting({{qualifiedPackageName}}.{{manager.visitableInterfaceName}} init) {
 		init.visit(this);
 	}	
 	
 	public {{manager.baseClassName}} getCurrent() { return current; }
 	public void setCurrent({{manager.baseClassName}} o) { current = o; }
 
-	public static class VisitedReferences {
-		private String[] names;
-		public VisitedReferences(String... names) {
-			this.names = names;
+	public static class VisitingActions {
+		private Object[] actions;
+		public VisitingActions(Object... actions) {
+			this.actions = actions;
 		}
 		
-		public EReference[] getReferences({{manager.baseClassName}} obj) {
-			EReference[] result = new EReference[names.length];
+		public VisitingAction[] getActions({{manager.baseClassName}} obj) {
+			VisitingAction[] result = new VisitingAction[actions.length];
 			EClass  eclass      = obj.original_().eClass();
-			for(int i = 0; i < names.length; i++) {
-				result[i] = (EReference) eclass.getEStructuralFeature(names[i]);
+			
+			for(int i = 0; i < actions.length; i++) {
+				if ( actions[i] instanceof String ) {
+					String refName = (String) actions[i];
+					result[i] = new VisitingAction((EReference) eclass.getEStructuralFeature(refName));
+				} else if ( actions[i] instanceof VisitingAction ) {
+					result[i] = (VisitingAction) actions[i];
+				}
 			}
 			return result;
 		}
 	}
+	
+	public static class VisitingAction {
+		public static final int REFERENCE = 0;
+		public static final int METHOD_CALL = 1;
+		public static final int FILTER_CALL = 2;
+		
+		private int actionType = -1;
+
+		// For references
+		private EReference	reference;
+		
+		// For method calls
+		private Object[]	arguments;
+		private java.lang.reflect.Method	method;
+		private ATLModelVisitor receptor;
+		
+		public VisitingAction({{manager.visitorBaseClassName}} receptor, java.lang.reflect.Method method, Object[] arguments) {
+			actionType = METHOD_CALL;
+			this.receptor = receptor;
+			this.method = method;
+			this.arguments = arguments;
+		}
+
+		public static VisitingAction createFilter({{manager.visitorBaseClassName}} receptor, java.lang.reflect.Method method, Object[] arguments) {
+			VisitingAction va = new VisitingAction(receptor, method, arguments);
+			va.actionType = FILTER_CALL;
+			return va;
+		}
+		
+		public VisitingAction(EReference r) {
+			actionType = REFERENCE;
+			this.reference = r;
+		}
+
+		public int getActionType() {
+			return actionType;
+		}
+		
+		public boolean isReference() {
+			return getActionType() == REFERENCE;
+		}
+		
+		public EReference getEReference() {
+			return this.reference;
+		}
+		
+		public boolean isMethodCall() {
+			return getActionType() == METHOD_CALL;
+		}
+		
+		public boolean isFilter() {
+			return getActionType() == FILTER_CALL;
+		}
+		
+		public Object performMethodCall() {
+			try {
+				return method.invoke(receptor, arguments);
+			} catch ( Exception e ) {
+				throw new RuntimeException(e);
+			}	
+		}
+	}
+	
+	
+	
+	public VisitingAction method(String methodName, Object... arguments) {
+		// Does not work fine because getMethod does not check for compatible types
+		/*
+		Class<?>[] argTypes = new Class<?>[arguments.length];
+		for(int i = 0; i < arguments.length; i++) {
+			argTypes[i] = arguments[i].getClass();
+		}
+		
+		java.lang.reflect.Method method = null;
+		try {
+			
+			method = this.getClass().getMethod(methodName, argTypes);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+		*/
+		
+		for(java.lang.reflect.Method m : this.getClass().getDeclaredMethods()) {
+			if ( m.getName().equals(methodName) ) {
+				return new VisitingAction(this, m, arguments);
+			}
+		}
+		
+		throw new RuntimeException("No method " + methodName + " found in " + this.getClass().getName());
+	}
+
+	public VisitingAction filter(String methodName, Object... arguments) {
+		for(java.lang.reflect.Method m : this.getClass().getDeclaredMethods()) {
+			if ( m.getName().equals(methodName) ) {
+				return VisitingAction.createFilter(this, m, arguments);
+			}
+		}
+		
+		throw new RuntimeException("No method " + methodName + " found in " + this.getClass().getName());
+	}
+	
+
 }

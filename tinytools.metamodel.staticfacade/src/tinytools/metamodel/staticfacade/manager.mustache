@@ -16,6 +16,38 @@ public class {{manager.className}} {
 	private Resource resource;
 	private HashMap<EObject, {{manager.baseClassName}}> wrappers = new HashMap<EObject, {{manager.baseClassName}}>();
 	private HashMap<Class<?>, EClass> classes = new HashMap<Class<?>, EClass>();
+
+	public Resource getResource() {
+		return resource;
+	}
+
+	public static {{manager.className}} createEmptyModel(Resource metamodel, Resource model) {
+		{{manager.className}} instance = new {{manager.className}}();
+		instance.resource = metamodel;
+		java.util.HashSet<EPackage> packages = new java.util.HashSet<EPackage>();		
+		TreeIterator<EObject> contents = metamodel.getAllContents();
+		while ( contents.hasNext() ) {
+			EObject obj = contents.next();
+			if ( obj instanceof EPackage ) {
+				packages.add((EPackage) obj);
+			}
+		}
+		instance.initFromPackages(packages);
+		return instance;
+	}
+
+	private void initFromPackages(java.util.HashSet<EPackage> packages) {
+		for (EPackage p : packages) {
+			for(EClassifier c : p.getEClassifiers()) {
+				if ( c instanceof EClass ) {
+					classes.put(getInterfaceOfEClass((EClass) c), (EClass) c);
+					classes.put(getClassOfEClass((EClass) c), (EClass) c);
+				}
+			}
+		}
+	}
+
+	private {{manager.className}}() { }
 		
 	public {{manager.className}}(Resource r) {
 		this.resource = r;
@@ -45,17 +77,9 @@ public class {{manager.className}} {
 			packages.add(o.eClass().getEPackage());
 		}
 		
-		for (EPackage p : packages) {
-			for(EClassifier c : p.getEClassifiers()) {
-				if ( c instanceof EClass ) {
-					classes.put(getInterfaceOfEClass((EClass) c), (EClass) c);
-					classes.put(getClassOfEClass((EClass) c), (EClass) c);
-				}
-			}
-		}
+		initFromPackages(packages);
 	}
-
-
+	
 	public <T> java.util.List<? extends T> allObjectsOf(Class<T> clazz) {
 		java.util.List<T> list = new java.util.ArrayList<T>();
 		

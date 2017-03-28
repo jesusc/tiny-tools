@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Staticfacade
-Bundle-SymbolicName: tinytools.metamodel.staticfacade
+Bundle-Name: TinyTools Static Facade Generators
+Bundle-SymbolicName: tinytools.metamodel.staticfacade;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: tinytools.metamodel.staticfacade.Activator
 Require-Bundle: org.eclipse.ui,
@@ -9,7 +9,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.emf;bundle-version="2.6.0",
  org.eclipse.emf.ecore;bundle-version="2.7.0",
  org.junit,
- org.eclipse.emf.ecore.xmi;bundle-version="2.7.0"
+ org.eclipse.emf.ecore.xmi;bundle-version="2.7.0",
+ org.eclipse.emf.codegen.ecore,
+ org.eclipse.core.resources;bundle-version="3.9.1",
+ org.eclipse.emf.common.ui
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/mustache-compiler-0.8.15-SNAPSHOT-jar-with-dependencies.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: lib/mustache-compiler-0.8.15-SNAPSHOT-jar-with-dependencies.jar,
+ .
+Export-Package: tinytools.metamodel.copier,
+ tinytools.metamodel.extender,
+ tinytools.metamodel.merger,
+ tinytools.metamodel.staticfacade,
+ tinytools.metamodel.staticfacade.ui,
+ tinytools.metamodel.visitor,
+ tinytools.metamodel.visitor.ui

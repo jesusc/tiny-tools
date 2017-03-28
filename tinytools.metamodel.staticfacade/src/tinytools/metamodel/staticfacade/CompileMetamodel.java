@@ -13,14 +13,11 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -30,7 +27,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-public class CompileMetamodel {
+public class CompileMetamodel extends BaseCompiler {
 	public void compile(Resource r, Options options) throws IOException {
 
 		ManagerWrapper managerWrapper = new ManagerWrapper(options);
@@ -106,88 +103,6 @@ public class CompileMetamodel {
 		return filename;
 	}	
 
-	private OutputStream createClassFile(String filename) throws IOException {
-		File file = new File(filename);
-		if (!file.exists()) {
-			file.getParentFile().mkdirs();
-			file.createNewFile();
-		}
-		return new FileOutputStream(file, false);
-	}
-
-	private void invokeTemplate(String templateName,
-			HashMap<String, Object> scopes, OutputStream out) {
-		Writer writer = new OutputStreamWriter(out);
-		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile(new StringReader(
-				readTemplate(templateName)), templateName);
-
-		mustache.execute(writer, scopes);
-		try {
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private String readTemplate(String templateName) {
-		InputStream stream = Activator.class.getResourceAsStream(templateName);
-		StringBuilder inputStringBuilder = new StringBuilder();
-		try {
-			BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(stream, "UTF-8"));
-			String line = bufferedReader.readLine();
-			while (line != null) {
-				inputStringBuilder.append(line);
-				inputStringBuilder.append('\n');
-				line = bufferedReader.readLine();
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				stream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return inputStringBuilder.toString();
-	}
-
-	private List<EPackage> getAllPackages(Resource r) {
-		return getAllOfType(r, EPackage.class);
-	}
-
-	private <T> List<T> getAllOfType(Resource r, Class<T> clazz) {
-		List<T> list = new ArrayList<T>();
-		TreeIterator<EObject> it = r.getAllContents();
-		while (it.hasNext()) {
-			EObject o = it.next();
-			if (clazz.isInstance(o)) {
-				list.add(clazz.cast(o));
-			}
-		}
-		return list;
-	}
-
-	private <T> List<? extends T> filter(EList<? extends Object> original,
-			Class<T> clazz) {
-		List<T> list = new ArrayList<T>();
-		Iterator<? extends Object> it = original.iterator();
-		while (it.hasNext()) {
-			Object o = it.next();
-			if (clazz.isInstance(o)) {
-				list.add(clazz.cast(o));
-			}
-		}
-		return list;
-	}
 
 	public static class ManagerWrapper {
 		HashMap<EClass, EClassWrapper> wrappers = new HashMap<EClass, CompileMetamodel.EClassWrapper>();
@@ -304,7 +219,7 @@ public class CompileMetamodel {
 		}
 
 		public List<EFeatureWrapper> getFeatures() {
-			List<EFeatureWrapper> features = new ArrayList<CompileMetamodel.EFeatureWrapper>();
+			List<EFeatureWrapper> features = new ArrayList<EFeatureWrapper>();
 			for (EStructuralFeature f : eClass.getEAllStructuralFeatures()) {
 				if (f instanceof EReference)
 					features.add(new EReferenceWrapper(this, (EReference) f));
