@@ -5,7 +5,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 
 @SuppressWarnings("unchecked")
-public class {{manager.visitorClassName}} {
+public class {{manager.visitorClassName}} {{manager.extendsText}} {
 	protected boolean _debug = false;
 	protected EObject current;
 	
@@ -25,7 +25,7 @@ public class {{manager.visitorClassName}} {
 	}	
 	
 	public EObject getCurrent() { return current; }
-	protected void setCurrent(EObject o) { current = o; }
+	public void setCurrent(EObject o) { current = o; }
 	
 	{{#manager.getConcreteClasses}}
 	protected void visit{{name}}({{qualifiedClassName}} this_) {
@@ -79,20 +79,33 @@ public class {{manager.visitorClassName}} {
 	
 	}
 	
-	private void visit(EObject obj) {	
+	protected void visit(EObject obj) {	
 	{{#manager.getConcreteClasses}}
 	if ( obj.eClass().getName().equals("{{name}}") ) { visit{{name}}(({{qualifiedClassName}}) obj); return; }
 	{{/manager.getConcreteClasses}}	
 	{{#manager.getJavaInstances}}
 	if ( obj.eClass().getName().equals("{{name}}") ) { return; }
 	{{/manager.getJavaInstances}}	
-	throw new IllegalStateException("Cannot handle class: " + obj.eClass().getName());
+
+	{{#manager.hasBaseClass}}
+	   super.visit(obj);
+	{{/manager.hasBaseClass}}
+	{{^manager.hasBaseClass}}
+		unknownClassOf(obj);
+	{{/manager.hasBaseClass}}
+
+	}
+	
+	protected void unknownClassOf(EObject obj) {
+		throw new IllegalStateException("Cannot handle class: " + obj.eClass().getName());	
 	}
 	
 	//
 	// Framework code inlined as a template
 	//
-	
+
+	{{^manager.hasBaseClass}}
+
 	public static class VisitingActions {
 		private Object[] actions;
 		public VisitingActions(Object... actions) {
@@ -114,7 +127,7 @@ public class {{manager.visitorClassName}} {
 			return result;
 		}
 	}
-	
+
 	public static class VisitingAction {
 		public static final int REFERENCE = 0;
 		public static final int METHOD_CALL = 1;
@@ -176,6 +189,7 @@ public class {{manager.visitorClassName}} {
 			}	
 		}
 	}
+	{{/manager.hasBaseClass}}
 	
 
 	private java.util.HashMap<String, java.lang.reflect.Method> allMethods = null;
@@ -209,5 +223,28 @@ public class {{manager.visitorClassName}} {
 		}
 		
 		throw new RuntimeException("No method " + methodName + " found in " + this.getClass().getName());
-	}	
+	}
+
+	{{#manager.hasBaseClass}}
+	public static class DelegatedVisitor extends {{manager.visitorClassName}} {
+		private {{manager.qualifiedBaseClass}} delegate;
+		public DelegatedVisitor({{manager.qualifiedBaseClass}} delegate) {
+			this.delegate = delegate;
+		}
+		
+		@Override
+		public EObject getCurrent() { return delegate.getCurrent(); }
+		@Override
+		public void setCurrent(EObject o) { delegate.setCurrent(o); }
+			
+		{{#manager.getBaseEClasses}}
+		public void in{{name}}({{qualifiedClassName}} self) { delegate.in{{name}}(self); }
+		public void before{{name}}({{qualifiedClassName}} self) { delegate.before{{name}}(self); }
+		public void after{{name}}({{qualifiedClassName}} self)  { delegate.after{{name}}(self); }
+		{{/manager.getBaseEClasses}}
+		
+			
+	}
+	{{/manager.hasBaseClass}}
+		
 }

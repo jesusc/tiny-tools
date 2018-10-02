@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
 import org.eclipse.emf.codegen.ecore.genmodel.GenFeature;
@@ -11,6 +12,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tinytools.metamodel.staticfacade.BaseCompiler;
 
@@ -28,6 +30,12 @@ public class VisitorCreator extends BaseCompiler {
 			}
 		}
 
+		if ( options.getBaseMetamodel() != null )  {
+			List<GenClass> classesGen = getAllOfType(options.getBaseMetamodel(), GenClass.class);
+			managerWrapper.setBaseClasses(classesGen.stream().map(c -> new EClassVisitor(c, managerWrapper, options)).collect(Collectors.toList()));
+			
+		}		
+		
 		// Generate the manager
 		String managerFile = options.getBaseDir() + File.separator
 				+ options.getPackagePrefix().replaceAll("\\.", "/")
@@ -42,9 +50,18 @@ public class VisitorCreator extends BaseCompiler {
 
 	public static class VisitorWrapper extends ManagerBase {
 		private VisitorOptions options;
+		private List<? extends EClassVisitor> baseEClasses;
 
 		public VisitorWrapper(VisitorOptions options2) {
 			this.options = options2;
+		}
+		
+		public void setBaseClasses(List<? extends EClassVisitor> baseEClasses) {
+			this.baseEClasses = baseEClasses;
+		}
+
+		public List<? extends EClassVisitor> getBaseEClasses() {
+			return baseEClasses;
 		}
 		
 		public String getPackageName() {
@@ -57,6 +74,18 @@ public class VisitorCreator extends BaseCompiler {
 		
 		public String getQualifiedPackageName() {
 			return options.getPackagePrefix();
+		}
+		
+		public boolean hasBaseClass() {
+			return options.getQualifiedBaseClass() != null;			
+		}
+		
+		public String getExtendsText() {
+			return options.getQualifiedBaseClass() == null ? "" : " extends " + options.getQualifiedBaseClass();
+		}
+		
+		public String getQualifiedBaseClass() {
+			return options.getQualifiedBaseClass();
 		}
 		
 	}
