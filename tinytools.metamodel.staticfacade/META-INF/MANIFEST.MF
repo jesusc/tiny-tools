@@ -18,6 +18,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/mustache-compiler-0.8.15-SNAPSHOT-jar-with-dependencies.jar,
  .
 Export-Package: tinytools.metamodel.copier,
+ tinytools.metamodel.explicitvisitor,
  tinytools.metamodel.extender,
  tinytools.metamodel.merger,
  tinytools.metamodel.staticfacade,
